@@ -89,6 +89,7 @@ func setupRoutes(conf config.Configuration, chartsImplementation data.Charts, he
 	// Chart Version routes
 	apiv1.Methods("GET").Path("/charts/{repo}/{chartName}/versions").Handler(handlers.WithParams(chartHandlers.GetChartVersions))
 	apiv1.Methods("GET").Path("/charts/{repo}/{chartName}/versions/{version}").Handler(handlers.WithParams(chartHandlers.GetChartVersion))
+	apiv1.Methods("DELETE").Path("/charts/{repo}/{chartName}/versions/{version}").Handler(handlers.WithParams(chartHandlers.DeleteChart))
 
 	// Repo routes
 	repoHandlers := repos.NewRepoHandlers(dbSession)

@@ -75,6 +75,30 @@ func (c *ChartHandlers) RefreshChart(w http.ResponseWriter, req *http.Request, p
 	renderer.Render.JSON(w, http.StatusOK, payload)
 }
 
+// RefreshChart is the handler for the /charts/{repo}/{name} endpoint
+func (c *ChartHandlers) DeleteChart(w http.ResponseWriter, req *http.Request, params handlers.Params) {
+	chartPackage, err := c.chartsImplementation.ChartVersionFromRepo(params["repo"], params["chartName"], params["version"])
+	if err != nil {
+		log.Printf("data.chartsapi.ChartFromRepo(%s, %s) error (%s)", params["repo"], params["chartName"], err)
+		notFound(w, ChartResourceName)
+		return
+	}
+	db, closer := c.dbSession.DB()
+	defer closer()
+	chartResource := helpers.MakeChartResource(db, chartPackage)
+	err = c.chartsImplementation.DeleteChart(params["repo"], params["chartName"], params["version"])
+
+	if err != nil {
+		message := fmt.Sprintf("data.chartsapi.RefreshChart(%s, %s) error (%s)", params["repo"], params["chartName"], err)
+		log.Printf(message)
+		renderer.Render.JSON(w, http.StatusBadRequest, models.Error{Code: pointerto.Int64(http.StatusBadRequest), Message: &message})
+		return
+
+	}
+	payload := handlers.DataResourceBody(chartResource)
+	renderer.Render.JSON(w, http.StatusOK, payload)
+}
+
 // GetChartVersion is the handler for the /charts/{repo}/{name}/versions/{version} endpoint
 func (c *ChartHandlers) GetChartVersion(w http.ResponseWriter, req *http.Request, params handlers.Params) {
 	chartPackage, err := c.chartsImplementation.ChartVersionFromRepo(params["repo"], params["chartName"], params["version"])

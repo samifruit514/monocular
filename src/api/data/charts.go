@@ -22,4 +22,5 @@ type Charts interface {
 	// Refresh freshens charts data
 	Refresh() error
 	RefreshChart(Repo string, ChartName string) error
+	DeleteChart(Repo string, ChartName string, chartVersion string) error
 }
